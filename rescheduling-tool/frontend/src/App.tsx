@@ -1,33 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 
+import CardView from './elements/CardView'
+import HistoryView from './elements/HistoryView';
+import NavBar from './elements/NavBar'
+import WaitlistView from './elements/WaitlistView';
+import './index.css'
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+} from "react-router-dom";
 function App() {
-  const [count, setCount] = useState(0)
 
+  /* 
+  * overview *
+  ROUTES controls what displays based on the URL. 
+  The reason for the double redundancy of the CardView element is inclase the user is directed
+  to the website with no information after the URL.
+  */
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <NavBar />
+      <Router>
+        <Routes>
+            <Route path="/" element={<CardView />} /> 
+            <Route path="/home" element={<CardView />} />
+            <Route path="/waitlists" element={<WaitlistView />} />
+            <Route path="/history" element={<HistoryView />} />
+          
+        </Routes>
+      </Router>
+      
+      
     </>
   )
 }

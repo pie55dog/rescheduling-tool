@@ -10,9 +10,11 @@ const SCOPES: string[] = ["https://www.googleapis.com/auth/spreadsheets.readonly
 // The path to the credentials file.
 const CREDENTIALS_PATH: string = path.join(process.cwd(), "credentials.json");
 
+// old pathe:  https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+ 
 /**
  * Fetches the names and majors of students from a sample spreadsheet.
- * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+ * @see https://docs.google.com/spreadsheets/d/1psBvhgyLT_rDJ1q15XmjVXiSDk6kSJ8avUgcAUz70yU/edit?gid=0#gid=0
  */
 export async function listMajors(): Promise<Array<{ name: string; major: string }>> {
   // Authenticate with Google and get an authorized client.
@@ -26,8 +28,8 @@ export async function listMajors(): Promise<Array<{ name: string; major: string 
 
   // Get the values from the spreadsheet.
   const result = await sheets.spreadsheets.values.get({
-    spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
-    range: "Class Data!A2:E",
+    spreadsheetId: "1psBvhgyLT_rDJ1q15XmjVXiSDk6kSJ8avUgcAUz70yU",
+    range: "test!A:B",
   });
 
   const rows = result.data.values;
@@ -39,7 +41,7 @@ export async function listMajors(): Promise<Array<{ name: string; major: string 
   console.log("Name, Major:");
   const majors = rows.map((row) => {
     const name = row[0] ?? "";
-    const major = row[4] ?? "";
+    const major = row[1] ?? "";
     console.log(`${name}, ${major}`);
     return { name, major };
   });
