@@ -18,6 +18,7 @@ const CREDENTIALS_PATH: string = path.join(process.cwd(), "credentials.json");
  */
 export async function listMajors(): Promise<Array<{ name: string; major: string }>> {
   // Authenticate with Google and get an authorized client.
+  console.log("reached authetication")
   const auth = await authenticate({
     scopes: SCOPES,
     keyfilePath: CREDENTIALS_PATH,
@@ -27,6 +28,7 @@ export async function listMajors(): Promise<Array<{ name: string; major: string 
   const sheets: sheets_v4.Sheets = google.sheets({ version: "v4", auth });
 
   // Get the values from the spreadsheet.
+  console.log("reached spreadhseed")
   const result = await sheets.spreadsheets.values.get({
     spreadsheetId: "1psBvhgyLT_rDJ1q15XmjVXiSDk6kSJ8avUgcAUz70yU",
     range: "test!A:B",
@@ -49,9 +51,4 @@ export async function listMajors(): Promise<Array<{ name: string; major: string 
   return majors;
 }
 
-// Example standalone run (only if you run this file directly)
-if (process.argv[1] === __filename) {
-  listMajors().catch((err) => {
-    console.error("Error fetching majors:", err);
-  });
-}
+

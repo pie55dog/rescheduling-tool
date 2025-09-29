@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
+    "axios": "^1.12.2",
     "express": "^5.1.0",
     "googleapis": "^105.0.0"
   },
