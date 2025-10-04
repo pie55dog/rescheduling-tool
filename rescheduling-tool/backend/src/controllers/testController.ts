@@ -1,13 +1,18 @@
 // backend/src/googleSheetsRunner.ts
-import { getSheetData } from "../services/allServices";
-import { Request, Response } from "express";
 
+//? THIS IS MIDDLE WEAR
+
+
+import { getSheetData } from "../services/cardServices";
+import { Request, Response } from "express";
+import {getAuthenticatedSheet} from "../index"
+import { google, sheets_v4 } from "googleapis";
 
 export const handleGetAll = async (req: Request, res: Response) => { //req variable will be used to extract any :perams later
   try {
     console.log("reached the controller!")
-
-    const all = await getSheetData("test!A:B");
+    const authenticatedSheet: sheets_v4.Sheets = await getAuthenticatedSheet();
+    const all = await getSheetData(authenticatedSheet, "test!A:B");
     console.log("result from getSheetData: " + all)
     if (!all) {
       return res.status(404).json({  //handles 404
