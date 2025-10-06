@@ -35,7 +35,7 @@ app.use(cors({
 app.use(express.json());
 
 // MOUNTING ALL ROUTES TO SERVER
-app.use("/getsomeAB", getAllRoute)
+app.use("/getCardInformation", getAllRoute)
 
 // Start server AFTER authentication completes
 async function startServer() {
