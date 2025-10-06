@@ -24,6 +24,7 @@ export default function Card({index}: CardProps){ //import the type of index fro
     ,[]); //this empty array means RUN ON STARTUP!
 
     return <div>
+        <p>name</p>
         <p>{
         cardContent}</p>
     </div>
