@@ -35,7 +35,7 @@ app.use(cors({
 app.use(express.json());
 
 // MOUNTING ALL ROUTES TO SERVER
-app.use("/getCardInformation", getAllRoute)
+app.use("/getCardInformation", getAllRoute) // app.use means that we can use perams on this route. just .get doesn't allow perams
 
 // Start server AFTER authentication completes
 async function startServer() {
