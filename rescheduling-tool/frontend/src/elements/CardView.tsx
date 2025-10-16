@@ -14,6 +14,7 @@ export default function CardView() {
 
         useEffect(() => {
             async function createCardList () {
+                
                 try{
                     const requestPath = "http://localhost:5000/getAllCards" ;
                     console.log("{{{{{{retreaving all cards in CardView Element}}}}}}")
@@ -48,9 +49,8 @@ export default function CardView() {
         
     ,[]); //this empty array means RUN ON LOAD!
 
-    return <div>
-        //display listy of cards here
-        return (
+    return(<div>
+        
     <div>
         <h1>
             print the lists
@@ -73,8 +73,8 @@ export default function CardView() {
         <Card key={`done-${i}`} index={card.index} />
         ))}
     </div>
-)
-    </div>
+
+    </div>)
 }
 
 /*

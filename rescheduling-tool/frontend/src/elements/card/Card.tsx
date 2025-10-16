@@ -4,30 +4,35 @@ import type { CardPropsFRONT } from "../../types"
 
 
 export default function Card({index}: CardPropsFRONT){ //import the type of index from CardProps type
-    const [cardContent, setCardContent] = useState <string> ("loading.."); //setCardContent is the setter for the const
+    const [cardContent, setCardContent] = useState<string[]>([]); //setCardContent is the setter for the const
     //TODO: cardContent should be of type CardItem, not string. need to show loading some other way
-        useEffect(() => {
-            async function getStuff () {
-                try{
-                    //TODO: get to be able to process multiple indexs (rn its throwing and making wierd stuff)
-                    const requestPath = "http://localhost:5000/getCardInformation/" + index.toString();
-                    console.log("card " + index + " is requesting at " + requestPath)
-                    const cardInfo = await axios.get(requestPath);
-                    setCardContent(JSON.stringify(cardInfo.data))
-                }catch (error){
-                    console.error("Error: ", error);
-                    setCardContent("There was an error! Please refer to the console.")
-                }
+    useEffect(() => {
+        async function getSpecificCardContent () {
+            try {
+                //TODO: get to be able to process multiple indexs (rn its throwing and making wierd stuff)
+                const requests = index.map((i) => {
+                    console.log("card " + i + " is requesting at " + `http://localhost:5000/getCardInformation/${i+1}`);
+                    return axios.get(`http://localhost:5000/getCardInformation/${i+1}`);
+                });
+                const responses = await Promise.all(requests);
+                const contents = responses.map(res => JSON.stringify(res.data));
+                setCardContent(contents);
+            } catch (error) {
+                console.error("Error: ", error);
+                setCardContent(["There was an error! Please refer to the console."]);
             }
-        getStuff()
         }
-        
-    ,[]); //this empty array means RUN ON LOAD!
+        //TODO make stuff a list of card objects
+        getSpecificCardContent();
+    }, []); //this empty array means RUN ON LOAD!
 
     return <div>
         <p>name</p>
-        <p>{
-        cardContent}</p>
+        {cardContent.map((item, i) => (
+            <div key={i}>
+                {item}
+            </div>
+        ))}
     </div>
 }
 
