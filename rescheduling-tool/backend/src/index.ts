@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import path from "node:path";
-import getAllRoute from './routes/getAllRoute'
+import getAllRoute from './routes/getAllRequestsRoute'
+import getCardRoute from './routes/getCardRoute'
 import process from "node:process";
 import { authenticate } from "@google-cloud/local-auth";
 import { google, sheets_v4 } from "googleapis";
@@ -35,7 +36,8 @@ app.use(cors({
 app.use(express.json());
 
 // MOUNTING ALL ROUTES TO SERVER
-app.use("/getCardInformation", getAllRoute) // app.use means that we can use perams on this route. just .get doesn't allow perams
+app.use("/getCardInformation", getCardRoute) // app.use means that we can use perams on this route. just .get doesn't allow perams
+app.use("/getAllCards", getAllRoute)
 
 // Start server AFTER authentication completes
 async function startServer() {

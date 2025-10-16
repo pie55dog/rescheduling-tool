@@ -26,13 +26,13 @@ export async function getSheetData(sheets: sheets_v4.Sheets,range: string) {
   
 
   //?should this go in the controller? since the conrtoller handles what happens between service and front end
-  
+  //TODO: make this return an actually useful card schema
+  //check if spreadsheet is empty
   const rows = response.data.values;
   if (!rows || rows.length === 0) {
-    console.log("No data found.");
+    console.log("spreadsheet seems empty. Contact grabish@nuevaschool.org");
     return [];
   }
-
   const cleanedData = rows.map((row) => {
     const grade = row[0] ?? "";
     const type = row[1] ?? "";
