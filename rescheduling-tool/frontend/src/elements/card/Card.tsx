@@ -9,7 +9,7 @@ export default function Card({index}: CardPropsFRONT){ //import the type of inde
     useEffect(() => {
         async function getSpecificCardContent () {
             try {
-                //TODO: get to be able to process multiple indexs (rn its throwing and making wierd stuff)
+                //now processes multiple indexes!!
                 const requests = index.map((i) => {
                     console.log("card " + i + " is requesting at " + `http://localhost:5000/getCardInformation/${i+1}`);
                     return axios.get(`http://localhost:5000/getCardInformation/${i+1}`);
