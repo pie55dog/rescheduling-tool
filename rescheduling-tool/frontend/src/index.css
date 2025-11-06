@@ -1,2 +1,31 @@
 @import "tailwindcss";
 
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 16px;
+    width: 260px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .card h2 {
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+    color: #222;
+  }
+  
+  .card p {
+    margin: 0;
+    color: #555;
+    font-size: 0.9rem;
+  }
+
+.card-header {
+  font-size: 1.8rem;     
+  font-weight: bold;   
+  text-transform: uppercase; 
+  color: #333;      
+  margin: 1rem 0 0.5rem 0; 
+  border-bottom: 2px solid #4A90E2; 
+  padding-bottom: 0.3rem; 
+}
