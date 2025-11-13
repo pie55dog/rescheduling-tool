@@ -1,17 +1,22 @@
 //all frontend types stored here
 
-
 export type CardItem = {
-  grade: string;
-  name: string;
-  //waitlistOverImm: "Yes" | "No" | "Depends"; //Ryan no longer is going to provide this feild on the form
-  dropInstructions: string;
-  reason: string;
-  classesToDrop: string;
-  //COURSES TO CHANGE!
-  rankedChoices: Array<string> //TODO: get controller or service to do this
-  finalComments: string;
-};
+        grade: string
+        type: string
+        // name?: string -- example of an optional part of the map that u might want to adjust later
+    }
+
+// export type CardItem = {
+//   grade: string;
+//   name: string;
+//   //waitlistOverImm: "Yes" | "No" | "Depends"; //Ryan no longer is going to provide this feild on the form
+//   dropInstructions: string;
+//   reason: string;
+//   classesToDrop: string;
+//   //COURSES TO CHANGE!
+//   rankedChoices: Array<string> //TODO: get controller or service to do this
+//   finalComments: string;
+// };
 
 
 //* reason for this deistinction is because CardView gets a lot of 

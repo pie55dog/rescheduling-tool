@@ -95,9 +95,11 @@ export async function getSheetData(sheets: sheets_v4.Sheets,range: string) {
       else (null) //TODO: how to make this fail loudly? 
     }
   }
+
+  
   getCards();
   sortCards();
-  return { Done, Waitlist, To_Do };
+  return { Done, Waitlist, To_Do, AllCards };
 
 }
  

@@ -1,3 +1,14 @@
+//This doc has a lot of AI!
+// since front end is something I don't really care about, I got AI to generate it 
+// and add sufficent comments such that a front end dev could easily understand 
+//what is going on. 
+
+//to sum it up in my own words, this element is an organizer for cards. I created this 
+//react structure in order to maintain 'less information' per component (OOP standard)
+//it will organize everything by location in the master AllCards list.
+//OG drag drop function by Deniz Soral.
+
+
 import Card from "./card/Card"
 import {useState, useEffect} from "react";
 import axios from 'axios';
@@ -10,246 +21,348 @@ import {
 
 import type { DropResult } from "@hello-pangea/dnd";
 
-// THIS IS WHERE ALL THE HELPER STUFF FOR DRAGGING LISTS STARTS
- // need to wrap all of them in try/excepts!
-    
-// function removes the item at startIndex and inserts it at endIndex
-// returning a copy of the list with this new order
-function reorder<T>(list: T[],startIndex: number, endIndex: number): T[] {
-    // simple checks to save time
-    if (startIndex === endIndex) return list;
-    if (startIndex < 0 || startIndex >= list.length) return list;
-    if (endIndex < 0 || endIndex > list.length) return list;
+// ═══════════════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS FOR LIST MANIPULATION
+// ═══════════════════════════════════════════════════════════════════════
 
-    const copy = Array.from(list)
-    // we want to grab the element that we're removing
-    // modifies in place, but also returns the removed element
-    // doing the [] is the same thing as [0] at the end of the splice
-    const [removed] = copy.splice(startIndex,1)
-    copy.splice(endIndex,0,removed)
-    return copy
-}
 
-// function takes an object from one list, and moves it to another!
-function move<T>(sourceList: T[],destList: T[],sourceIndex: number,destIndex: number): 
+
+/**
+ * MOVE FUNCTION
+ * 
+ * Moves a card from one list to another
+ * Note: We no longer use destIndex - cards are always appended and then sorted
+ * 
+ * @param sourceList - The list we're taking the card from
+ * @param destList - The list we're adding the card to
+ * @param sourceIndex - Position in source list to remove from
+ * @param destIndex - (Ignored - kept for compatibility with drag-drop library)
+ * @returns Object with newSource and newDest arrays
+ */
+function move<T>(sourceList: T[], destList: T[], sourceIndex: number): 
 {newSource: T[]; newDest: T[]} {
-    if (sourceIndex < 0 || sourceIndex >= sourceList.length) return { newSource: sourceList, newDest: destList };
-    if (destIndex < 0 || destIndex > destList.length) return { newSource: sourceList, newDest: destList };
+    // Validation checks
+    if (sourceIndex < 0 || sourceIndex >= sourceList.length) {
+        return { newSource: sourceList, newDest: destList };
+    }
 
+    // Create copies to avoid mutating original arrays
     const source = Array.from(sourceList)
     const destination = Array.from(destList)
 
-    const [moved] = source.splice(sourceIndex,1)
-    destination.splice(destIndex,0,moved)
+    // Remove card from source list
+    const [moved] = source.splice(sourceIndex, 1)
+    
+    // Add card to END of destination list (position will be fixed by sorting)
+    destination.push(moved)
+    
     return {newSource: source, newDest: destination}
 }
 
-
-//import type { CardProps } from "../types"
-export default function CardView() {
-
-       const [cardTo_DoList, setCardTo_DoList] = useState <CardPropsBACK[]> ([]); 
-       const [cardWaitlistList, setCardWaitlistList] = useState <CardPropsBACK[]> ([]);
-       const [cardDoneList, setCardDoneList] = useState <CardPropsBACK[]> ([]);
-
-        useEffect(() => {
-            async function createCardList () {
-                
-                try{
-                    const requestPath = "http://localhost:5000/getAllCards" ;
-                    console.log("{{{{{{retreaving all cards in CardView Element}}}}}}")
-                    const cardLists = await axios.get(requestPath);
-                    setCardTo_DoList(cardLists.data.To_Do)
-                    setCardWaitlistList(cardLists.data.Waitlist)
-                    setCardDoneList(cardLists.data.Done)
-                    /*controller needs to return EITHER: 
-                        a processed list
-                        or a REALLY messy list of all the rows
-                    i'm leaning towards having the controller or service do any processing. 
-                    ===
-                    So they will get all the rows, spearate into waitlist/todo/done
-                    and return a list of CardProp type objects with indexes and emails
-
-                    Then, the createCardList() function will return three lists of cards: 
-                    - Waitlist
-                    - To-Do
-                    - Done
-
-
-                    */
-                }catch (error){
-                    console.error("Error: ", error);
-                    setCardTo_DoList([])
-                    setCardWaitlistList([])
-                    setCardDoneList([])
-                }
+/**
+ * SORT BY ALL CARDS ORDER
+ * 
+ * Sorts a list of cards based on their order in the master allCardList.
+ * This ensures cards always maintain their canonical ordering regardless
+ * of how they were dragged and dropped.
+ * 
+ * Algorithm:
+ * 1. For each card in the list to sort
+ * 2. Find its position in allCardList by comparing lowest indices
+ * 3. Sort by those positions
+ * 
+ * @param list - The list to sort (e.g., cardTo_DoList)
+ * @param allCards - The master list defining canonical order
+ * @returns Sorted copy of the list
+ */
+function sortByAllCardsOrder(list: CardPropsBACK[], allCards: CardPropsBACK[]): CardPropsBACK[] {
+    // Create a copy to avoid mutating the original
+    const copy = Array.from(list);
+    
+    /**
+     * Helper: Get the lowest index from a card's index array
+     * Examples:
+     *   [15] → 15
+     *   [4, 5, 6] → 4
+     *   [10, 2, 8] → 2
+     */
+    const getLowestIndex = (card: CardPropsBACK): number => {
+        return Math.min(...card.index);
+    };
+    
+    /**
+     * Helper: Find a card's position in allCardList
+     * Returns the array index (0, 1, 2, ...) or Infinity if not found
+     * 
+     * We compare by lowest index because that's the card's canonical identifier
+     */
+    const getPositionInAllCards = (card: CardPropsBACK): number => {
+        const cardLowestIndex = getLowestIndex(card);
+        
+        
+        // Find the card in allCards that has the same lowest index
+        let position = -1;
+        for (let i = 0; i < allCards.length; i++) {
+            if (getLowestIndex(allCards[i]) === cardLowestIndex) {
+                position = i;
+                break;
             }
-        createCardList()
         }
         
-    ,[]); //this empty array means RUN ON LOAD!
+        // If not found, return Infinity (will sort to end)
+        return position === -1 ? Infinity : position;
+    };
+    
+    // Sort the list based on position in allCards
+    copy.sort((a, b) => {
+        const posA = getPositionInAllCards(a);
+        const posB = getPositionInAllCards(b);
+        return posA - posB; // Ascending order
+    });
+    
+    return copy;
+}
 
-    // HELPERS to get the id of a list easier, and change it easier
-    const getListById = (id: string) => {
+// ═══════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════
+
+export default function CardView() {
+    // State: Three separate lists for each column
+    const [cardTo_DoList, setCardTo_DoList] = useState<CardPropsBACK[]>([]);
+    const [cardWaitlistList, setCardWaitlistList] = useState<CardPropsBACK[]>([]);
+    const [cardDoneList, setCardDoneList] = useState<CardPropsBACK[]>([]);
+    
+    // State: Master list defining canonical order
+    const [allCardList, setallCardList] = useState<CardPropsBACK[]>([]);
+
+    /**
+     * EFFECT: Load all cards from backend on mount
+     * Backend should return cards already sorted by index
+     */
+    useEffect(() => {
+        
+        async function createCardList() {
+            try {
+                const requestPath = "http://localhost:5000/getAllCards";
+                console.log("{{{{{{retrieving all cards in CardView Element}}}}}}")
+                const cardLists = await axios.get(requestPath);
+                
+                // Set all lists from backend response
+                // Assuming backend returns pre-sorted lists
+                setCardTo_DoList(cardLists.data.To_Do)
+                setCardWaitlistList(cardLists.data.Waitlist)
+                setCardDoneList(cardLists.data.Done)
+                setallCardList(cardLists.data.AllCards)
+                
+            } catch (error) {
+                console.error("Error: ", error);
+                // On error, reset to empty lists
+                setCardTo_DoList([])
+                setCardWaitlistList([])
+                setCardDoneList([])
+                setallCardList([])
+            }
+        }
+        createCardList()
+        console.log(allCardList);
+    }, []); // Empty dependency array = run once on mount
+
+    /**
+     * HELPER: Get a list by its string ID
+     * Returns a copy to avoid accidental mutations
+     */
+    const getListById = (id: string): CardPropsBACK[] => {
         if (id === "todo") return [...cardTo_DoList];
         if (id === "waitlist") return [...cardWaitlistList];
         if (id === "done") return [...cardDoneList];
         return [];
     };
     
+    /**
+     * HELPER: Update a list by its string ID
+     */
     const setListById = (id: string, newList: CardPropsBACK[]) => {
         if (id === "todo") setCardTo_DoList(newList);
         if (id === "waitlist") setCardWaitlistList(newList);
         if (id === "done") setCardDoneList(newList);
     };
-    
 
-
-    // FROM DOCS type DropResult = {
-    //     draggableId: string;       
-    //     type: string;              
-    //     reason: "DROP" | "CANCEL";
-    //     source: DraggableLocation;
-    //     destination?: DraggableLocation | null; 
-    //     combine?: Combine | null; 
-    //   };
-    //handles what should happen after the mouse drops the object, called by DragDropContext
+    /**
+     * DRAG END HANDLER
+     * 
+     * Called when user finishes dragging a card.
+     * Now automatically sorts both source and destination lists!
+     * 
+     * @param result - Contains source/destination info from drag-drop library
+     */
     const handleDragEnd = (result: DropResult) => {
-        const { source, destination } = result;
-        if (!destination) return; //make sure that we're moving it somewhere
         
-        // for moving in same list
+        const { source, destination } = result;
+        
+        // User dropped outside any valid drop zone
+        if (!destination) return;
+
+        // User dropped in the same list (no change needed)
         if (source.droppableId === destination.droppableId) {
-          const list = getListById(source.droppableId);
-          const reorderedList = reorder(list, source.index, destination.index);
-          setListById(source.droppableId, reorderedList);
-          return;
+            return;
         }
-        // for moving between lists
+
+        // ───────────────────────────────────────────────────────────────
+        // Move the card between lists
+        // ───────────────────────────────────────────────────────────────
         const sourceList = getListById(source.droppableId);
         const destList = getListById(destination.droppableId);
-        const { newSource, newDest } = move(
-          sourceList,
-          destList,
-          source.index,
-          destination.index
-        );
-    
-        setListById(source.droppableId, newSource);
-        setListById(destination.droppableId, newDest);
-      };
-    return(
-        // main wrapper
-        <DragDropContext onDragEnd={handleDragEnd}>
-            {/* defines an area where things can be dropped */}
-            <Droppable droppableId="todo">
-                {(provided) =>(
-                    // provided is a package given by the library for the drag/drop to work!
-                    // ... spreads out all the props
-                    <div {...provided.droppableProps} ref={provided.innerRef}>
-                        <h2 className="card-header">To Do</h2>
-                        {cardTo_DoList.map((card,i) =>(
-                            // defines each object that can be dragged/dropped
-                            <Draggable key={`todo-${card.index.join("-")}`} draggableId={`todo-${card.index.join("-")}`} index={i}>
-                                {(provided) => (
-                                <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                    <Card index={card.index} />
-                                </div>
-                                )}
-                            </Draggable>
-                        ))}
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
-            <Droppable droppableId="waitlist">
-                {(provided) =>(
-                    // provided is a package given by the library for the drag/drop to work!
-                    // ... spreads out all the props
-                    <div {...provided.droppableProps} ref={provided.innerRef}>
-                        <h2 className="card-header">Waitlist</h2>
-                        {cardWaitlistList.map((card,i) =>(
-                            // TODO: is key supposed to be different, its an array and react expects 1 number only...
-                            <Draggable key={`waitlist-${card.index.join("-")}`} draggableId={`waitlist-${card.index.join("-")}`} index={i}>
-                                {(provided) => (
-                                <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                    <Card index={card.index} />
-                                </div>
-                                )}
-                            </Draggable>
-                        ))}
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
-            <Droppable droppableId="done">
-                {(provided) =>(
-                    // provided is a package given by the library for the drag/drop to work!
-                    // ... spreads out all the props
-                    // I think the ref is just like a pointer to an element? so the library can handle where to insert it in the DOM?
-                    <div {...provided.droppableProps} ref={provided.innerRef}>
-                        <h2 className="card-header">Done</h2>
-                        {cardDoneList.map((card,i) =>(
-                            // TODO: is key supposed to be different, its an array and react expects 1 number only...
-                            <Draggable key={`done-${card.index.join("-")}`} draggableId={`done-${card.index.join("-")}`} index={i}>
-                                {(provided) => (
-                                <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                    <Card  index={card.index} />
-                                </div>
-                                )}
-                            </Draggable>
-                        ))}
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
-        </DragDropContext>
-    )
-
-    // --OLD HTML--
-
-    // return(<div>
         
-    // <div>
-    //     <h1>
-    //         print the lists
-    //     </h1>
-    //     {/* blocking these out for now because they're annoying */}
-    //     {/* <p>{JSON.stringify(cardTo_DoList)}</p>
-    //     <p>{JSON.stringify(cardWaitlistList)}</p>
-    //     <p>{JSON.stringify(cardDoneList)}</p> */}
-    //     <h2>To Do</h2>
-    //     {cardTo_DoList.map((card, i) => (
-    //     <Card key={`todo-${i}`} index={card.index} />
-    //     ))}
+        // Move returns unsorted lists
+        const { newSource, newDest } = move(
+            sourceList,
+            destList,
+            source.index,
+            
+        );
 
-    //     <h2>Waitlist</h2>
-    //     {cardWaitlistList.map((card, i) => (
-    //     <Card key={`waitlist-${i}`} index={card.index} />
-    //     ))}
+        // ───────────────────────────────────────────────────────────────
+        // Sort both lists by allCardList order
+        // ───────────────────────────────────────────────────────────────
+        const sortedSource = sortByAllCardsOrder(newSource, allCardList);
+        const sortedDest = sortByAllCardsOrder(newDest, allCardList);
 
-    //     <h2>Done</h2>
-    //     {cardDoneList.map((card, i) => (
-    //     <Card key={`done-${i}`} index={card.index} />
-    //     ))}
-    // </div>
+        // ───────────────────────────────────────────────────────────────
+        // Update state with sorted lists
+        // ───────────────────────────────────────────────────────────────
+        setListById(source.droppableId, sortedSource);
+        setListById(destination.droppableId, sortedDest);
+        
+        console.log(`📦 Moved card from ${source.droppableId} to ${destination.droppableId} (auto-sorted)`);
+    };
 
-    // </div>)
+    // ═══════════════════════════════════════════════════════════════════
+    // RENDER
+    // ═══════════════════════════════════════════════════════════════════
+    return(
+        <div className="flex gap-4 p-4">
+            <DragDropContext onDragEnd={handleDragEnd}>
+                {/* ═══════════════════════════════════════════════════ */}
+                {/* TO-DO COLUMN                                        */}
+                {/* ═══════════════════════════════════════════════════ */}
+                <Droppable droppableId="todo">
+                    {(provided, snapshot) =>(
+                        <div 
+                            {...provided.droppableProps} 
+                            ref={provided.innerRef}
+                            className={`flex-1 min-h-[500px] p-4 rounded-lg transition-colors ${
+                                snapshot.isDraggingOver ? 'bg-blue-100' : 'bg-gray-50'
+                            }`}
+                        >
+                            <h2 className="card-header text-xl font-bold mb-4">
+                                To Do ({cardTo_DoList.length})
+                            </h2>
+                            {cardTo_DoList.map((card, i) =>(
+                                <Draggable 
+                                    key={card.index.join("-")} 
+                                    draggableId={card.index.join("-")} 
+                                    index={i}
+                                >
+                                    {(provided, snapshot) => (
+                                        <div 
+                                            ref={provided.innerRef} 
+                                            {...provided.draggableProps} 
+                                            {...provided.dragHandleProps}
+                                            className={`mb-2 transition-shadow ${
+                                                snapshot.isDragging ? 'shadow-lg opacity-80' : ''
+                                            }`}
+                                        >
+                                            <Card index={card.index} />
+                                        </div>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+                
+                {/* ═══════════════════════════════════════════════════ */}
+                {/* WAITLIST COLUMN                                     */}
+                {/* ═══════════════════════════════════════════════════ */}
+                <Droppable droppableId="waitlist">
+                    {(provided, snapshot) =>(
+                        <div 
+                            {...provided.droppableProps} 
+                            ref={provided.innerRef}
+                            className={`flex-1 min-h-[500px] p-4 rounded-lg transition-colors ${
+                                snapshot.isDraggingOver ? 'bg-yellow-100' : 'bg-gray-50'
+                            }`}
+                        >
+                            <h2 className="card-header text-xl font-bold mb-4">
+                                Waitlist ({cardWaitlistList.length})
+                            </h2>
+                            {cardWaitlistList.map((card, i) =>(
+                                <Draggable 
+                                    key={card.index.join("-")} 
+                                    draggableId={card.index.join("-")} 
+                                    index={i}
+                                >
+                                    {(provided, snapshot) => (
+                                        <div 
+                                            ref={provided.innerRef} 
+                                            {...provided.draggableProps} 
+                                            {...provided.dragHandleProps}
+                                            className={`mb-2 transition-shadow ${
+                                                snapshot.isDragging ? 'shadow-lg opacity-80' : ''
+                                            }`}
+                                        >
+                                            <Card index={card.index} />
+                                        </div>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+                
+                {/* ═══════════════════════════════════════════════════ */}
+                {/* DONE COLUMN                                         */}
+                {/* ═══════════════════════════════════════════════════ */}
+                <Droppable droppableId="done">
+                    {(provided, snapshot) =>(
+                        <div 
+                            {...provided.droppableProps} 
+                            ref={provided.innerRef}
+                            className={`flex-1 min-h-[500px] p-4 rounded-lg transition-colors ${
+                                snapshot.isDraggingOver ? 'bg-green-100' : 'bg-gray-50'
+                            }`}
+                        >
+                            <h2 className="card-header text-xl font-bold mb-4">
+                                Done ({cardDoneList.length})
+                            </h2>
+                            {cardDoneList.map((card, i) =>(
+                                <Draggable 
+                                    key={card.index.join("-")} 
+                                    draggableId={card.index.join("-")} 
+                                    index={i}
+                                >
+                                    {(provided, snapshot) => (
+                                        <div 
+                                            ref={provided.innerRef} 
+                                            {...provided.draggableProps} 
+                                            {...provided.dragHandleProps}
+                                            className={`mb-2 transition-shadow ${
+                                                snapshot.isDragging ? 'shadow-lg opacity-80' : ''
+                                            }`}
+                                        >
+                                            <Card index={card.index} />
+                                        </div>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            </DragDropContext>
+        </div>
+    )
 }
-
-/*
-
-OLD card test
-<div>
-            <h2 className="text-3xl">I am a card!</h2>
-            <Card index={2} studentEmail="placeholder"></Card>
-        </div>
-        <div>
-            <h2 className="text-3xl">I am a card!</h2>
-            <Card index={3} studentEmail="placeholder"></Card>
-        </div>
-        <div>
-            <h2 className="text-3xl">I am a card!</h2>
-            <Card index={4} studentEmail="placeholder"></Card>
-        </div> 
-        */

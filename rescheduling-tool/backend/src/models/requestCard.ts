@@ -10,7 +10,7 @@ export type CardItem = {
   finalComments: string;
 };
 
-export type CardPropsBACK = {
+export type CardPropsBACK = { //(backend)
   index: Array<number> ; //index can be a single number or an array of numbers
   studentEmail: string;
   isWaitlisted: boolean;
