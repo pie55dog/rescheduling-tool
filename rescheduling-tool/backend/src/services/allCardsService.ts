@@ -26,11 +26,6 @@ export async function getSheetData(sheets: sheets_v4.Sheets,range: string) {
   });
   console.log("response.data: " + JSON.stringify(response))
   
-
-  //?should this go in the controller? since the conrtoller handles what happens between service and front end
-  //TODO: this is no longer useful????
-    //* WORKING RN!!
-  //check if spreadsheet is empty
   const rows : any[][] | null | undefined = response.data.values;
   if (!rows || rows.length === 0) {
     console.log("spreadsheet seems empty. Contact grabish@nuevaschool.org");

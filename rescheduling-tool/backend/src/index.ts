@@ -2,9 +2,17 @@ import express, { Request, Response } from 'express';
 import path from "node:path";
 import getAllRoute from './routes/getAllRequestsRoute'
 import getCardRoute from './routes/getCardRoute'
+import putCardPositionRoute from './routes/putCardPosition'
 import process from "node:process";
 import { authenticate } from "@google-cloud/local-auth";
 import { google, sheets_v4 } from "googleapis";
+
+//* INDEX.TS
+// this document:
+//  - initalizes the server
+//  - initalizes all routes (/foo/29873/....)
+//  - exports the backend on port 5000
+
 
 const SCOPES: string[] = ["https://www.googleapis.com/auth/spreadsheets"];
 const CREDENTIALS_PATH: string = path.join(process.cwd(), "/src/credentials.json");
@@ -38,6 +46,10 @@ app.use(express.json());
 // MOUNTING ALL ROUTES TO SERVER
 app.use("/getCardInformation", getCardRoute) // app.use means that we can use perams on this route. just .get doesn't allow perams
 app.use("/getAllCards", getAllRoute)
+
+//! NOT WORKING CURRENTLY !
+//TODO: finish the /saveAllPositions feature!
+app.use("/saveAllPositions", putCardPositionRoute)
 
 // Start server AFTER authentication completes
 async function startServer() {

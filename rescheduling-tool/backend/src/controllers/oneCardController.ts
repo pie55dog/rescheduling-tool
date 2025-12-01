@@ -2,7 +2,7 @@
 //? THIS IS MIDDLE WEAR
 
 
-import { getSheetData } from "../services/cardServices";
+import { getSheetData } from "../services/cardService";
 import { Request, Response } from "express";
 import {getAuthenticatedSheet} from "../index"
 import { google, sheets_v4 } from "googleapis";
