@@ -23,3 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 backend/src/credentials.json
+backend/src/scheduling-472421-bc2c4b09f4ff-creds.json
+
