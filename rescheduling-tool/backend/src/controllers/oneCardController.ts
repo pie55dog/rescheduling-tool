@@ -19,8 +19,8 @@ export const handleGetOneChange = async (req: Request, res: Response) => { //req
     if (!row) {
       return res.status(404).json({  //handles 404
         
-        error: "Thing not found", 
-        message: "The requested thing does not exist in the database"
+        error: "Card not found", 
+        message: "The requested card does not exist in the database"
       });
     }
     return res.status(200).json(row); //returns the all variable
@@ -28,7 +28,7 @@ export const handleGetOneChange = async (req: Request, res: Response) => { //req
       console.log(err)
       return res.status(500).json({ //handles server errors
         error: "Internal server error 500", 
-        message: "Failed to retrieve majors" 
+        message: "Failed to retrieve card" 
       })
   }
 }

@@ -34,9 +34,9 @@ export async function getSheetData(sheets: sheets_v4.Sheets,range: string) {
     return [];
   }
   const cleanedData = rows.map((row) => {
-    const grade = row[0] ?? "";
-    const type = row[1] ?? "";
-    return { grade, type };
+    const email = row[0] ?? "";
+    const name = row[1] ?? "";
+    return { email, name };
   });
   return cleanedData;
 }

@@ -79,7 +79,7 @@ export const handleUpdatePosition = async (req: Request, res: Response) => { //r
         console.log(err)
         return res.status(500).json({ //handles server errors
         error: "Internal server error 500", 
-        message: "Failed to retrieve majors" 
+        message: "Failed to retrieve card" 
         })
     }}
 }

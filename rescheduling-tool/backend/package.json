@@ -1,22 +1,22 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec ts-node ./src/index.ts"
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "supertest": "^7.1.4"
+  },
   "devDependencies": {
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
-  },
-  "dependencies": {
-    "cors": "^2.8.5"
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.15"
   }
-  
 }
